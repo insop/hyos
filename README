@@ -1,2 +1,7 @@
 hybrid OS scheduler for Linux kernel, RTLWS 2012
 see the paper and slide for further details
+
+hyos_plb is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License version 3.0, as published by the Free Software Foundation.  See file COPYING.
+
+NOTE: 
+- sched_fair.c is from Linux Kernel.
