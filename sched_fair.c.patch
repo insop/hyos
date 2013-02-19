@@ -1,0 +1,186 @@
+--- linux2.6_org/kernel/sched_fair.c	2012-03-21 04:45:50.000000000 -0700
++++ linux2.6/kernel/sched_fair.c	2012-03-21 05:01:14.000000000 -0700
+@@ -23,6 +23,92 @@
+ #include <linux/latencytop.h>
+ #include <linux/sched.h>
+ 
++#define ISS
++#ifdef ISS
++static char *hyos;
++//static unsigned int hyos_key;
++//static unsigned int hyos_data;
++static int init=0;
++
++/*              
++ * ISS Priority Queue
++ */             
++/* Definitions for peripheral HYOS_PLB_0 */
++#define XPAR_HYOS_PLB_0_BASEADDR 0xC0E00000
++#define XPAR_HYOS_PLB_0_HIGHADDR 0xC0E0FFFF
++
++static void __enqueue_iss(unsigned int key, unsigned int  data)
++{
++        if (init == 0) {
++                hyos = (char*)ioremap(XPAR_HYOS_PLB_0_BASEADDR, 0x10000);
++                printk( KERN_INFO, "Hardware address: 0x%8X, Virtual address: 0x%8X\n",
++                        (unsigned)XPAR_HYOS_PLB_0_BASEADDR, (unsigned)hyos);
++
++                init = 1;
++        }
++
++        if (hyos != NULL) {
++
++		//do_gettimeofday(&temp);
++		//if (printk_ratelimit())
++			//printk("key %lu data %lu\n", key, data);
++		iowrite32(key,hyos+4*4);     // key
++		iowrite32(data,hyos+5*4);        // val
++		iowrite32(0xffffffff,hyos);   // trigger 
++		iowrite32(0x0,hyos);
++	}
++}
++
++static unsigned int __pick_next_iss(void)
++{
++	unsigned int hyos_key, hyos_data;
++        if (init == 0) {
++                hyos = (char*)ioremap(XPAR_HYOS_PLB_0_BASEADDR, 0x10000);
++                //printk("Hardware address: 0x%8X, Virtual address: 0x%8X\n",
++                        //(unsigned)XPAR_HYOS_PLB_0_BASEADDR, (unsigned)hyos);
++
++                init = 1;
++        }
++
++        if (hyos != NULL) {
++
++		hyos_key = ioread32(hyos+6*4);
++		hyos_data = ioread32(hyos+7*4);
++		//if (printk_ratelimit())
++			//printk("pck %lu %lu \n", hyos_key, hyos_data);
++		
++		//iowrite32(0xffffffff,hyos+1*4);       // trigger extract for the next retrival
++		//iowrite32(0x0,hyos+1*4);       // 
++	}
++	else
++		hyos_data = 0;
++
++	return hyos_data;
++}
++
++static void __dequeue_iss()
++{
++	unsigned int hyos_key, hyos_data;
++
++        if (init == 0) {
++                hyos = (char*)ioremap(XPAR_HYOS_PLB_0_BASEADDR, 0x10000);
++                //printk("Hardware address: 0x%8X, Virtual address: 0x%8X\n",
++                        //(unsigned)XPAR_HYOS_PLB_0_BASEADDR, (unsigned)hyos);
++
++                init = 1;
++        }
++	
++        if (hyos != NULL) {
++		hyos_key = ioread32(hyos+6*4);
++		hyos_data = ioread32(hyos+7*4);
++		//if (printk_ratelimit())
++			//printk("rmv %lu %lu \n", hyos_key, hyos_data);
++		iowrite32(0xffffffff,hyos+1*4);       // trigger extract for the next retrival
++		iowrite32(0x0,hyos+1*4);       // 
++	}
++}
++#endif//ISS
++
+ /*
+  * Targeted preemption latency for CPU-bound tasks:
+  * (default: 6ms * (1 + ilog(ncpus)), units: nanoseconds)
+@@ -330,7 +416,19 @@
+ 	struct rb_node **link = &cfs_rq->tasks_timeline.rb_node;
+ 	struct rb_node *parent = NULL;
+ 	struct sched_entity *entry;
++//ISS
++	struct timeval t1, t2;
++
+ 	s64 key = entity_key(cfs_rq, se);
++//ISS
++	//if (printk_ratelimit())
++		//printk( "__enqueue_entity: %lu\n", se);
++#ifdef ISS
++	do_gettimeofday(&t1);
++	__enqueue_iss(key, se);
++	do_gettimeofday(&t2);
++#else
++	do_gettimeofday(&t1);
+ 	int leftmost = 1;
+ 
+ 	/*
+@@ -360,10 +458,24 @@
+ 
+ 	rb_link_node(&se->run_node, parent, link);
+ 	rb_insert_color(&se->run_node, &cfs_rq->tasks_timeline);
++	do_gettimeofday(&t2);
++
++#endif//ISS
++//ISS
++	if (printk_ratelimit())
++		printk("_enqueue_cfs: delta %lu\n", t2.tv_usec - t1.tv_usec);
+ }
+ 
+ static void __dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
+ {
++//ISS
++	struct timeval t1, t2;
++	do_gettimeofday(&t1);
++#ifdef ISS
++	__dequeue_iss();
++	
++#else
++
+ 	if (cfs_rq->rb_leftmost == &se->run_node) {
+ 		struct rb_node *next_node;
+ 
+@@ -372,16 +484,27 @@
+ 	}
+ 
+ 	rb_erase(&se->run_node, &cfs_rq->tasks_timeline);
++#endif //ISS
++//ISS
++	do_gettimeofday(&t2);
++	if (printk_ratelimit())
++        	printk("_denqueue_cfs: delta %lu\n", t2.tv_usec - t1.tv_usec);
+ }
+ 
+ static struct sched_entity *__pick_next_entity(struct cfs_rq *cfs_rq)
+ {
++#ifdef ISS
++	struct sched_entity *se = __pick_next_iss();
++	return se;
++
++#else
+ 	struct rb_node *left = cfs_rq->rb_leftmost;
+ 
+ 	if (!left)
+ 		return NULL;
+ 
+ 	return rb_entry(left, struct sched_entity, run_node);
++#endif// ISS
+ }
+ 
+ static struct sched_entity *__pick_last_entity(struct cfs_rq *cfs_rq)
+@@ -913,6 +1036,7 @@
+ static struct sched_entity *pick_next_entity(struct cfs_rq *cfs_rq)
+ {
+ 	struct sched_entity *se = __pick_next_entity(cfs_rq);
++
+ 	struct sched_entity *left = se;
+ 
+ 	if (cfs_rq->next && wakeup_preempt_entity(cfs_rq->next, left) < 1)
+@@ -3790,6 +3914,9 @@
+ 	struct cfs_rq *cfs_rq;
+ 	struct sched_entity *se = &curr->se;
+ 
++	//ISS
++	//printk(">>task_tick_fair:\n");
++
+ 	for_each_sched_entity(se) {
+ 		cfs_rq = cfs_rq_of(se);
+ 		entity_tick(cfs_rq, se, queued);

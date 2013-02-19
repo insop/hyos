@@ -1,0 +1,406 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% paper.tex = template for Real Time Linux Workshop papers
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[10pt,a4paper]{article}
+\usepackage[english]{babel}
+\usepackage{multicol}
+
+
+%% ISS added
+\usepackage{listings}
+\usepackage{color}
+\usepackage{url}
+
+\lstset{
+language=C,
+basicstyle=\small\sffamily,
+%numbers=left,
+%numberstyle=\tiny,
+frame=tb,
+columns=fullflexible,
+showstringspaces=false
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+title=\lstname,                 % show the filename of files included with \lstinputlisting;
+}
+
+%%\lstset{
+  %%language=C,                % choose the language of the code
+  %%numbers=left,                   % where to put the line-numbers
+  %%stepnumber=1,                   % the step between two line-numbers.        
+  %%numbersep=5pt,                  % how far the line-numbers are from the code
+  %%backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  %%showspaces=false,               % show spaces adding particular underscores
+  %%showstringspaces=false,         % underline spaces within strings
+  %%showtabs=false,                 % show tabs within strings adding particular underscores
+  %%tabsize=2,                      % sets default tabsize to 2 spaces
+  %%captionpos=b,                   % sets the caption-position to bottom
+  %%breaklines=true,                % sets automatic line breaking
+  %%breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+  %%title=\lstname,                 % show the filename of files included with \lstinputlisting;
+%%}
+
+\setlength{\paperheight}{297mm}
+\setlength{\paperwidth}{210mm}
+\setlength{\voffset}{-12mm}
+\setlength{\topmargin}{0mm}
+\setlength{\headsep}{8mm}
+\setlength{\headheight}{10mm}
+\setlength{\textheight}{235mm}
+\setlength{\hoffset}{-4mm}
+\setlength{\textwidth}{166mm}
+\setlength{\oddsidemargin}{0mm}
+\setlength{\evensidemargin}{0mm}
+\setlength{\marginparwidth}{0mm}
+\setlength{\marginparpush}{0mm}
+\setlength{\columnsep}{6mm}
+\setlength{\parindent}{6mm}
+\setlength{\parskip}{2mm}
+
+%% insert eps pictures
+%% use as \epsin{epsfile}{width_in_mm}{label}{caption}
+\usepackage{epsfig}
+\newcounter{figcounter}
+\def\epsin #1#2#3#4{
+\refstepcounter{figcounter} \label{#3}
+\[
+\mbox{
+  \epsfxsize=#2mm
+  \epsffile{#1.eps}
+}
+\]
+%\vspace{0mm}
+\begin{center}
+  \parbox{7cm}{{\bf FIGURE \arabic{figcounter}:}\quad {\it #4 } } \\
+\end{center}
+}
+
+%% insert table
+%% use as \tabin{size_in_mm}{label}{caption}{table_data}
+\newcounter{tabcounter}
+\def\tabin #1#2#3#4{
+\refstepcounter{tabcounter} \label{#2}
+\[ \makebox[#1mm][c]{#4} \]
+%\vspace{0mm}
+\begin{center}
+  \parbox{7cm}{{\bf TABLE \arabic{tabcounter}:}\quad {\it #3 } } \\
+\end{center}
+}
+
+\title{\LARGE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TITLE OF PAPER (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+HyOS: A Hybrid Operating System Design Approach for Real-Time Systems using Hardware Acceleration
+}
+
+
+\author{\large
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% AUTHOR (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{\bf Insop Song }\\ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% AFFILIATION (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Ericsson Inc.\\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% STREET ADDRESS (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+200 Holger Way, San Jose, CA\\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% E-MAIL (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{8mm}
+insop.song$@$ericsson.com\\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% AUTHOR (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%{\bf Li Su}\\ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% AFFILIATION (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%CASC Long March Launch Vehicle Technology CO. LTD\\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% STREET ADDRESS (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%7 Building, 15 Block, NO.188 West Road, the forth South Round, BeiJing\\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% E-MAIL (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%sudanlina$@$yahoo.com.cn \\
+}
+\date{}
+
+
+\begin{document}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ABSTRACT (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+In this research, a hybrid hardware/software operating system design approach is presented for improving predictability and reducing overhead. A hardware priority queue is implemented and interfaced with Linux operating system process scheduler. Implementing a hardware priority queue demonstrates the consistent response time and shorter response time. A benefit of implementing a generic data structure with hardware and integrating with software as a hybrid approach is described. A field programmable gate array (FPGA) is used for implementing Hybrid Operating System (HyOS) to holds a soft-core microprocessor and a hardware priority queue. We implement Hybrid OS (HyOS) with Linux as an operating system and MicroBlaze as a soft-core microprocessor. This research suggests and demonstrated the idea that identifying generic software components within operating systems and realize them by hardware accelerations could improve system performance and easier be accepted by industry.
+
+\end{abstract}
+
+\vspace{10mm}
+
+\begin{multicols}{2}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Predictability in real-time system is one the most important aspects and a criterion for real-time operating systems is to provide a predictable scheduler to meet time constraints. In this research, a hybrid hardware/software operating system design approach is presented to increase predictability of the operating system scheduler and reduce the overhead of operating system software.
+
+In most operating systems, a process scheduler runs most frequently and its critical process is to decide which process to schedule next, {\it i.e.} prioritizing runnable processes. Except few simple operating systems, the selection of a next process to run requires non-trivial computation. The computation complexity and time varies depends on the system load or number of runnable processes. Therefore, the process scheduler is one of the busiest software components in operating system; hence, it contributes to the overhead and response jitters.
+
+In operating system, a queue or priority queue is used in many components, such as process scheduling, event management, and time management. Linux, operating system used in many embedded systems, uses a Red-black tree priority queue to sort processes based on the scheduling key (priority, fairness, or deadline). Red-black tree is also used in high-resolution timer \cite{hrt} to sort based on expiration time. Other scheduler class also uses Red-black tree for priotizing the process entries \cite{sched_deadline}. Even a small performance improvement on these priority queues would improve overall system performance.
+
+Implementing co-processor and hardware accelerator is a common approach in many application domains when there is a specific task that could be hardware off-loaded. Few examples include math co-processor, graphic processing, and network packet processors.
+
+In this research, a hardware priority queue, which is called Tagged up/down sorter, is implemented and interfaced with Linux process scheduler software. Implementing a hardware priority queue guarantees the consistent response time and shorter response time then software implementation.
+A Field Programmable Gate Array (FPGA) is used for implementing Hybrid Operating System (HyOS) to holds a soft-core microprocessor and a hardware priority queue. We implement HyOS with Linux as an operating system and MicroBlaze as a soft-core microprocessor.
+
+This approach demonstrates that Hybrid Operating System reduces computation time in finding next process and maintains consistent response time compared to software only operating system.
+
+
+Organization of the paper is as follows: we present an overview of existing hardware-assisted operating system research. Next we introduce the implementation of Hybrid operating system with Linux, and then show the experimental result. Finally, summary and further research topic are described.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NEXT SECTION (OPTIONAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Overview of Hardware Operating System}
+
+In this section, overview of hardware operating system is described. Main approaches are to implement task management \& scheduling and event management in hardware in order to reduce the overhead and minimize jitters.
+
+FASTCHART designed operating system scheduler modules using hardware \cite{fastchart}. The Real-Time Unit (RTU) in it can manage 64 tasks with 8 priorities. It allows predictable real-time system using hardware OS modules. This work later evolved to a commercial hardware operating system called Sierra \cite{sierra}, which runs with soft-core CPU on the FPGA. Sierra use its custom software as an system call helper functions and also demonstrated with other software OS as scheduler plug-in \cite{susan_soc2007}.
+
+One of the early work that worthwhile to mention is Silicon TRON \cite{tron_1995}. Authors implemented most of the TRON OS system calls in hardware, and this work is implemented in VSLI chip.
+
+F-Timer is a dedicated hardware unit that processes 32 tasks list organized by time priority \cite{f-timer}. It consists of task processing and interrupts processing modules. The design is implemented using FPGA.
+
+Morton and Loucks also implemented entire OS with hardware \cite{andrew_2004}. Uniprocessor Earliest Deadline First (EDF) scheduler is designed and implemented with soft-core FPGA processor. Authors also show the comparisons between software only OS and hardware designed OS.
+
+\url{hthreads} is a hardware and software co-designed multi-threaded OS kernel \cite{Andrews_hthread}. Authors provided hybrid threaded programming model using both software and hardware. In order to minimize jitters, both scheduler processing and the state management migrated to hardware from software.
+
+In \cite{kohout_2003}, authors implemented task scheduling, time management, and event management with hardware. They use a cycle-accurate simulator to evaluate their hardware OS with MicroC/OS-II \cite{ucos}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NEXT SECTION (OPTIONAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hybrid Operating System}
+
+
+In many research projects shown in previous subsection, an operating system is implanted by hardware. The advantages of implementing entire or partial operating system components with hardware are well demonstrated including reducing jitters and overhead. However, it is not easy to find either commercial or non-commercial hardware operating systems in practical applications yet. The followings are the reasons.
+
+
+First, software part of the hardware operating system is less flexible and requires major changes to the operating system software and application software. This could be solved if the hardware modules changes are hidden to application programs; however, it usually not the case. Sierra, commercial hardware operating system, provides limited number system calls and requires porting of existing applications \cite{sierra}. 
+
+Second, design and fabrication of complicated hardware modules for operating system requires large investment and resource. Unless there are large demands, it is unlikely to be realized by chip manufactures. On the other hand, many hardware accelerations could be found in the areas with large demands, such as graphics and networking industry.
+
+Modern operating systems are usually very complicated, and making the whole operating system with hardware could be almost impractical. Many software projects use existing commercial and open source components that tightly coupled with operating systems. Any change to operating system requires application software changes, which are less desirable in many software projects. This means that if hardware accerlation to be used, required changes to software should be minimized.
+
+
+In this work, we implement a hardware component that replaces the software component that is frequently used in operating systems. The hardware component is integrated with existing operating system. Since we only take a generic data structure into hardware, hardware component design is less complicated and could be easily added to CPU if chip manufactures find demands and competitive edges from doing so. Also only minor changes are needed in operating system software.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SUB SECTION (OPTIONAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Operating System scheduler}
+
+A process scheduler is a core part of the operating system and decides next process to run. In Linux, CFS (Completely Fair Scheduler) handles process scheduling and maximizes processor utilization. CFS computes the fairness value based on waiting time for the processor. CFS needs a sorter that sorts based on the waiting time as a key in order to choose the next process. Red-black tree is used for sort processes based on the key.
+
+Red-black tree is known as an efficient data structure allows for efficient management of the containing entries. Even a small optimization on this data structure would improve the system performance since it is called quite frequently. One of the main ideas of this research is to use a hardware component instead of Red-black tree data structure to optimize operating system performance, which leads the next subsection to describe hardware sorter.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SUB SECTION (OPTIONAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Hardware Sorter}
+
+Hardware sorter, a priority queue, is used in many application areas including network packet processors and proved to be efficient \cite{tagged,tagged_routers,mq,moon}. We use a hardware based sorter called Tagged up/down sorter \cite{tagged}. The tagged sorter provides two operations: insert and extract minimum (or maximum). The operation can be done within one clock cycle. It also keeps FIFO order if the key values are identical.
+
+We replace Red-black tree in Linux with Tagged sorter to improve performance, which is described in next subsection.
+
+List \ref{code:taggedsorter} shows the vhdl entity defnition for the Tagged sorter implementation used in this research.
+%% Code list
+\lstinputlisting[label=code:taggedsorter,caption=Tagged sorter entity (interface port) definition from TSProject32.vhd,language=vhdl]{TSProject32.vhd}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SUB SECTION (OPTIONAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Hybrid OS design using hardware component}
+
+We use FPGA to implement Hybrid OS, which includes CPU and Tagged sorter. A soft-core microprocessor, MicroBlaze, and hardware sorter is connected through PLB (processor local bus) bus shown in Figure \ref{fig:block_diagram}. Tagged sorter sorts using the same way as Red-black tree and returns minimum key entries to CFS scheduler.
+
+Then kernel scheduler code is modified to use the hardware Tagged sorter. Instead of enqueue/dequeue to Red-black tree, the kernel scheduler enqueues and dequeues to the hardware sorter. Only few lines of code change are required, and no application code change is necessary.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{block_diagram}{70}{fig:block_diagram}{Hybrid OS with FPGA soft-core processor and tagged sorter}
+
+
+List \ref{code:sched} shows cleaned code fragment of enqueuing to tagged sorter extracted from \url{kernel/sched_fair.c}. In \url{__enqueue_entity()} of CFS scheduler, it calls \url{__enqueue_tagged_sorter()} to enqueue to Tagged sorter hardware instead of Red-black tree.
+
+%% Code list
+\lstinputlisting[label=code:sched,caption=Hybrid OS enqueue code fragment from modified sched\_fair.c
+,language=C]{sched_fair.c}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NEXT SECTION (OPTIONAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Experimental result}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{ml505}{80}{fig:ml505}{Xilinx ML505 reference board used in this research}
+
+This section presents the experimental results including simulation and real hardware testing. Xilinx Virtex5 (xc5vlx50tff1136-1) FPGA is used for the experiment, which is included in Xilinx ML505 evaluation board shown in Figure \ref{fig:ml505}.
+
+Table \ref{tab:util} shows the resource (registers and LUTS) usage for implementing Tagged sorter, not including Microblaze soft-core processor resource usage.
+
+\begin{table*}
+\centering
+\caption{FPGA device utilization for Tagged sorter}
+\label{tab:util}
+\begin{tabular}{|l|r|r|r|} \hline
+	Slice Logic Utilization&Used&Available&Utilization\\ \hline
+	Number of Slice Registers&8,352&28,800&29\%\\ \hline
+	Number of Slice LUTs     &8,910&28,800&30\%\\ \hline
+\end{tabular}	
+\end{table*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SUB SECTION (OPTIONAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Simulation results}
+
+Figure \ref{fig:modelsim} shows the RTL simulation result using ModelSim \cite{modelsim}. Enqueuing order with key and value pair is as follows: (4:1), (2:4), (4:2), (1:7), (3:4), (9:4), (6:1), (7:4), (9:5), (9:6), (153:134), (409:135), (145:134), and (265:135). Note that there are entries with the same keys: 4 and 9. Dequeuing returns based minimum key entities with FIFO order preserved, which is as follows: (2:4), (3:4), (4:1), (4:2), (6:1), (7:4), (9:4), (9:5), (9:6), (145:134), (153:134), (265:135), and (409:135). Both enqueuing and dequeuing entries done within one clock cycle and it returns (-1,-1) when the queue is empty. Tagged sorter is implemented by VHDL (VHSIC hardware description language).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure*}
+\begin{center}	
+	\epsin{hyos_modelsim1}{185}{fig:modelsim}{Simulation result of enqueue and dequeue of Tagged sorter}
+\end{center}	
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SUB SECTION (OPTIONAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Experimental results}
+
+Time taken for CFS enqueue and dequeue are measured with non-modified Linux and Linux with HyOS (Hybrid OS). We use {\it yes} program for simulating processor load. 2.6.37 kernel is used for the test.
+
+Figure \ref{fig:0yes-enqueue} shows the enqueuing time difference between software OS and Hybrid OS when no ``yes" is running. Enqueue time of software is about twice longer then Hybrid OS approach. y axis unit is micro second.
+
+
+Figure \ref{fig:0yes-dequeue} shows the dequeuing time difference between software OS and Hybrid OS when no ``yes" is running, which shows similar values as in Figure \ref{fig:0yes-enqueue}.
+
+
+Figure \ref{fig:4yes-enqueue} shows the enqueuing time difference between software OS and Hybrid OS when four ``yes" are running. Hybrid OS output shows the same as when there was no ``yes" (no processor load); however, software OS values are increased and shows more fluctuations.
+
+
+Figure \ref{fig:4yes-dequeue} shows the dequeuing time difference between software OS and hybrid OS when four ``yes" are running, which shows similar trends as in Figure \ref{fig:4yes-enqueue}.
+
+
+Figure \ref{fig:comparison-no-enqueue} and \ref{fig:comparison-no-dequeue} show the enqueue and dequeue time increment of software OS from no ``yes" to four ``yes". Time taken is clearly increased.
+
+On the other hand for the Hybrid OS, Figure \ref{fig:comparison-hyos-enqueue} and \ref{fig:comparison-hyos-dequeue} show the enqueue and dequeue time increment of Hybrid OS from no ``yes" to four ``yes". As is expected that time taken for enqueuing and dequeuing are nearly the same.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{0yes-enqueue}{75}{fig:0yes-enqueue}{Enqueue time comparison between software OS and Hybrid OS when no ``yes" running. y-axis unit:usec}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{0yes-dequeue}{75}{fig:0yes-dequeue}{Dequeue time comparison between software OS and Hybrid OS when no ``yes" running. y-axis unit: usec}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{4yes-enqueue}{75}{fig:4yes-enqueue}{Enqueue time comparison between software OS and Hybrid OS when four ``yes" running. y-axis unit: usec}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{4yes-dequeue}{75}{fig:4yes-dequeue}{Dequeue time comparison between software OS and Hybrid OS when four ``yes" running, y-axis unit: usec}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{comparison-no-enqueue}{75}{fig:comparison-no-enqueue}{Enqueue time comparison of software OS when no load and four ``yes", y-axis unit: usec}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{comparison-no-dequeue}{75}{fig:comparison-no-dequeue}{Dequeue time comparison of software OS when no load and four ``yes", y-axis unit: usec}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{comparison-hyos-enqueue}{75}{fig:comparison-hyos-enqueue}{Enqueue time comparison of Hybrid OS when no load and four ``yes", y-axis unit: usec}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES ARE HANDLED LIKE THIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\epsin{comparison-hyos-dequeue}{75}{fig:comparison-hyos-dequeue}{Dequeue time comparison of Hybrid OS when no load and four ``yes", y-axis unit: usec}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NEXT SECTION (OPTIONAL)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+
+
+In this paper, we presented Hybrid OS that consists of Linux and a hardware sorter which replaces Red-black tree data structure used in Linux CFS scheduler. We implement Hybrid OS with Linux using FPGA and provide simulation and experimental results, and demonstrate the performance improvement and jitters reduction. In this approach, we only need to patch few lines of Linux code to use hardware sorter and no application code change is needed, which is different than other existing approaches. Hence, our approach could be used in wider practical application projects if commercial hardware product is available.
+
+Implementing a hardware component for a generic data structure, such as a priority queue, could be easily accepted by chip manufactors than implementing entire operating system. Also a queue or priority queue is most commonly used data structure in operating systems. Hardware Tagged sorter, as a priority queue, could be used in other scheduler class, such as \url{SCHED_DEAD} or high resolution timer.
+
+Though modern operating systems are rather complex and continuously evolving, few operating systems such as Linux is used by majority of industry. So identifying software components within popular operating systems and realize them by hardware accelerations would improve system performance and be accepted by industry.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% REFERENCES (REQUIRED)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{thebibliography}{9}%use this if you have <=9 bib refs
+%\begin{thebibliography}{99}%use this if you have >9 bib refs
+
+\bibitem{sindhwani_rtlws2004} M. Sindhwani, T. F. Oliver, D. L. Maskell and T. Srikanthan, {\it RTOS Acceleration Techniques - Review and Challenges}, Real-Time Linux Workshop, 2004
+\bibitem{sierra} T. Klevin, {\it Get RealFast RTOS with Xilinx FPGAs,} Xcell Journal, Spring 2003
+\bibitem{fastchart} L Lindh and F. Stanishewski, {\it FASTCHART – Idea and Implementation,} IEEE Internaltional Conference on Computer Design (ICCD), Boston, 1991
+\bibitem{susan_soc2007} S. Nordstrom and L. Asplund {\it Configurable Hardware/Software Support for Single Processor Real-Time Kernels,} Internaltional Symposium on System-on-Chip, 2007
+\bibitem{tagged} S Moore and B. Graham, {\it Tagged Up/Down Sorter – A Hardware Priority Queue,} The Computer Journal, Vol. 38, No. 9, 1995
+\bibitem{tagged_routers} C. Wang, H. Wu, S. Huang, {\it A fast tagged sorter used in 100/10 MBPS routers,} International Conference on Consumer Electronics, 2000
+\bibitem{mq} A. Morton, I. Song, J. Liu, {\it Hardware data structure for real-time scheduling and concurrency,} Proceedings of the IEEE International Conference on Field Programmable Logic and Applications, 2007
+\bibitem{moon} S. Moon, J. Rexford, K. Shin, {\it Scalable hardware priority queue architectures for high-speed packet switches,} IEEE Transactions on Computers, Nov. 2000
+\bibitem{andrew_2004} A. Morton and W. Loucks, {\it A Hardware/Software Kernel for System on Chip Designs,} ACM Symposium on Applied Computing, 2004
+\bibitem{Andrews_hthread} D. Andrews, W. Peck, J. Agron, K. Preston, E. Komp, M. Finley, R. Sass, {\it hthreads: a hardware/software co-designed multithreaded RTOS kernel,} IEEE Conference on Emerging Technologies and Factory Automation, 2005
+\bibitem{f-timer} A. Parisoto, A. Souza Jr., L. Carro, M. Pontremoli, C. Pereira, A. Suzim, {\it F-Timer: Dedicated FPGA to Real-Time System Design Support,} Proceedings., Ninth Euromicro Workshop on Real-Time Systems, 1997
+\bibitem{tron_1995} T. Nakano, A. Utma, M. Itabashi, A. Shiomi, M. Imai, {\it Hardware implementation of a real-time operating system,} The 12th TRON Project International Symposium, 1995
+\bibitem{kohout_2003} P. Kohout, B. Ganesh, B. Jacob, {\it Hardware support for real-time operating systems,} international conference on Hardware/software codesign and system synthesis, 2003
+\bibitem{ucos} MicroC/OS-II, \url{http://micrium.com}
+\bibitem{xilinx} Xilinx Inc., \url{http://www.xilinx.com}
+\bibitem{modelsim} Mentor Graphics, \url{http://model.com}
+\bibitem{hrt} J. Corbet, {\it The high-resolution timer API,} LWN.net, \url{http://lwn.net/Articles/167897}
+\bibitem{sched_deadline} D. Faggioli, F. Checconi, M. Trimarchi, C. Scordino, {\it An EDF scheduling class for the Linux kernel,}, Real-time Linux Workshop, 2009
+\end{thebibliography}
+
+\end{multicols}
+\end{document}

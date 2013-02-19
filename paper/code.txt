@@ -1,0 +1,99 @@
+// file: kernel/sched_fair.c
+...
+
+/*              
+ * Tagged Sorter based Priority Queue
+ */             
+/* Definitions for peripheral HYOS_PLB_0 */
+#define XPAR_HYOS_PLB_0_BASEADDR 0xC0E00000
+#define XPAR_HYOS_PLB_0_HIGHADDR 0xC0E0FFFF
+
+static void __enqueue_iss(unsigned int key, unsigned int  data)
+{
+        if (init == 0) {
+                hyos = (char*)ioremap(XPAR_HYOS_PLB_0_BASEADDR, 0x10000);
+                init = 1;
+        }
+
+        if (hyos != NULL) {
+		iowrite32(key,hyos+4*4);	// key
+		iowrite32(data,hyos+5*4);	// val
+		iowrite32(0xffffffff,hyos);	// enqueue trigger 
+		iowrite32(0x0,hyos);
+	}
+}
+...
+
+/*
+ * Enqueue an entity into the rb-tree:
+ * using HyOS
+ */
+static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
+{
+	struct rb_node **link = &cfs_rq->tasks_timeline.rb_node;
+	struct rb_node *parent = NULL;
+	struct sched_entity *entry;
+	struct timeval t1, t2;
+
+	s64 key = entity_key(cfs_rq, se);
+	do_gettimeofday(&t1);
+	__enqueue_iss(key, se);
+	do_gettimeofday(&t2);
+	if (printk_ratelimit())
+		printk("_enqueue_cfs: delta %lu\n", t2.tv_usec - t1.tv_usec);
+}
+
+//--------------------------------------------
+
+/*
+ * Enqueue an entity into the rb-tree:
+ */
+static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
+{
+	struct rb_node **link = &cfs_rq->tasks_timeline.rb_node;
+	struct rb_node *parent = NULL;
+	struct sched_entity *entry;
+	struct timeval t1, t2;
+
+	s64 key = entity_key(cfs_rq, se);
+#ifdef ISS	// Hybrid OS
+	do_gettimeofday(&t1);
+	__enqueue_iss(key, se);
+	do_gettimeofday(&t2);
+#else
+	do_gettimeofday(&t1);
+	int leftmost = 1;
+
+	/*
+	 * Find the right place in the rbtree:
+	 */
+	while (*link) {
+		parent = *link;
+		entry = rb_entry(parent, struct sched_entity, run_node);
+		/*
+		 * We dont care about collisions. Nodes with
+		 * the same key stay together.
+		 */
+		if (key < entity_key(cfs_rq, entry)) {
+			link = &parent->rb_left;
+		} else {
+			link = &parent->rb_right;
+			leftmost = 0;
+		}
+	}
+
+	/*
+	 * Maintain a cache of leftmost tree entries (it is frequently
+	 * used):
+	 */
+	if (leftmost)
+		cfs_rq->rb_leftmost = &se->run_node;
+
+	rb_link_node(&se->run_node, parent, link);
+	rb_insert_color(&se->run_node, &cfs_rq->tasks_timeline);
+	do_gettimeofday(&t2);
+
+#endif//ISS
+	if (printk_ratelimit())
+		printk("_enqueue_cfs: delta %lu\n", t2.tv_usec - t1.tv_usec);
+}

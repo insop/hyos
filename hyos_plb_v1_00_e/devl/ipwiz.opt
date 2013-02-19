@@ -1,0 +1,11 @@
+-batch 
+-create hyos_plb 
+-ver 1.00.e 
+-dir "/home/linux/linux/hardware/user-platforms/ml505_2_mul" 
+-lang verilog 
+-bus plbv46 s 
+-rst 
+-reg 8 
+-xps 
+-ise 
+-driver 

@@ -1,0 +1,18 @@
+##############################################################################
+## Filename:          /home/linux/linux/hardware/user-platforms/ml505_2_mul/pcores/hyos_plb_v1_00_e/data/hyos_plb_v2_1_0.pao
+## Description:       Peripheral Analysis Order
+## Date:              Thu Mar 22 15:43:09 2012 (by Create and Import Peripheral Wizard)
+##############################################################################
+
+lib proc_common_v3_00_a  all 
+lib plbv46_slave_single_v1_01_a  all 
+lib hyos_plb_v1_00_e user_logic verilog
+lib hyos_plb_v1_00_e tagged_pak vhdl
+lib hyos_plb_v1_00_e TaggedSorter vhdl
+lib hyos_plb_v1_00_e TaggedSorter2 vhdl
+lib hyos_plb_v1_00_e TaggedSorter4 vhdl
+lib hyos_plb_v1_00_e TaggedSorter8 vhdl
+lib hyos_plb_v1_00_e TaggedSorter16 vhdl
+lib hyos_plb_v1_00_e TaggedSorter32 vhdl
+lib hyos_plb_v1_00_e TSProject32 vhdl
+lib hyos_plb_v1_00_e hyos_plb vhdl

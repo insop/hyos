@@ -1,0 +1,12 @@
+run
+-opt_level 2
+-opt_mode speed
+-ifmt mixed
+-ifn "/home/linux/linux/hardware/user-platforms/ml505_2_mul/pcores/hyos_plb_v1_00_e/devl/synthesis/hyos_plb_xst.prj"
+-top hyos_plb
+-p virtex6
+-ofn "/home/linux/linux/hardware/user-platforms/ml505_2_mul/pcores/hyos_plb_v1_00_e/devl/synthesis/hyos_plb_xst.ngc"
+-iobuf NO
+-rtlview YES
+-hierarchy_separator /
+-work_lib hyos_plb_v1_00_e
